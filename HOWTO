@@ -1,0 +1,12 @@
+<pre>python3 stacktrace-decode.py 
+Usage: python script.py
+Please provide the SQUAD Testrun URL or SQUAD Test URL when prompted.
+Enter SQUAD Testrun URL or SQUAD Test URL: https://tuxapi.tuxsuite.com/v1/groups/linaro/projects/lkft/tests/2Z6fWqnSE1kpamQ0o5zfPlyS0CQ
+[SD] URL: https://tuxapi.tuxsuite.com/v1/groups/linaro/projects/lkft/tests/2Z6fWqnSE1kpamQ0o5zfPlyS0CQ
+[SD] Getting related kernel information.
+[SD] Getting kernel configuration.
+[SD] File: vmlinux:          /tmp/vmlinux
+[SD] File: System.map:       /tmp/System.map
+[SD] Looking for Tuxmake image.
+</pre>
+
