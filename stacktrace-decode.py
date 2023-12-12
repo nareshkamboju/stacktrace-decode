@@ -117,7 +117,7 @@ def get_tuxtest_logs(tuxtest_download_url):
 def get_debug_artifacts(tuxbuild_url):
     # Function to get debug artifacts (vmlinux and System.map)
     vmlinuxxz = tempfile.mktemp()
-    with open(vmlinuxxz, 'w') as f:
+    with open(vmlinuxxz, 'wb') as f:
         f.write(requests.get(f"{tuxbuild_url}/vmlinux.xz").content)
 
     os.rename(vmlinuxxz, '/tmp/vmlinux.xz')
