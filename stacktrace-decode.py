@@ -8,6 +8,10 @@ import re
 def log(message):
     print(f"[SD] {message}")
 
+def usage():
+    print("Usage: python script.py")
+    print("Please provide the SQUAD Testrun URL or SQUAD Test URL when prompted.")
+
 def fetch_url_content(url):
     return requests.get(url).text
 
@@ -37,6 +41,7 @@ def is_tuxtest_url(url):
     return bool(re.match(r'^https://tuxapi.tuxsuite.com/v1/groups/[A-Za-z0-9_]*/projects/[A-Za-z0-9_]*/tests/[A-Za-z0-9]*$', url))
 
 def new_test_cmd(tuxsuite_reproducer, tuxbuild_json):
+    # Function to construct the new tuxtest command
     tuxtest_cmd = subprocess.check_output(['grep', '^tuxsuite test', tuxsuite_reproducer]).decode().split()
     new_cmd = []
 
@@ -68,6 +73,7 @@ def new_test_cmd(tuxsuite_reproducer, tuxbuild_json):
     return new_cmd
 
 def new_tuxbuild_params(args):
+    # Function to process tuxbuild parameters
     new_params = []
     while args:
         arg = args.pop(0)
@@ -81,16 +87,19 @@ def new_tuxbuild_params(args):
     return new_params
 
 def get_tuxbuild_cmd_from_reproducer(reproducer):
+    # Function to get tuxbuild command from reproducer
     tuxsuite_build_cmd = subprocess.check_output(['sed', '-e', 's:# tuxsuite build:tuxsuite build:g', reproducer, '|', 'grep', '^tuxsuite build', '|', 'head', '-n1']).decode().split()
     return tuxsuite_build_cmd
 
 def get_tuxbuild_cmd_with_debug(reproducer, json_out):
+    # Function to construct the new tuxbuild command with DEBUG_INFO
     tuxbuild_cmd = get_tuxbuild_cmd_from_reproducer(reproducer)
     new_tuxbuild_cmd = ['tuxsuite', 'build'] + new_tuxbuild_params(tuxbuild_cmd) + ['--kconfig', 'CONFIG_DEBUG_INFO=y', '--kconfig', 'CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT=y', '--json-out', json_out, 'config', 'kernel', 'modules', 'debugkernel']
 
     return new_tuxbuild_cmd
 
 def build_kernel_and_reproduce_test(tuxbuild_reproducer, tuxtest_reproducer, tuxtest_download_url):
+    # Function to build the kernel with DEBUG_INFO and reproduce the test
     tuxbuild_json = tempfile.mktemp()
     new_tuxbuild_cmd = get_tuxbuild_cmd_with_debug(tuxbuild_reproducer, tuxbuild_json)
     subprocess.run(new_tuxbuild_cmd)
@@ -99,12 +108,14 @@ def build_kernel_and_reproduce_test(tuxbuild_reproducer, tuxtest_reproducer, tux
     subprocess.run(tuxtest_cmd, stderr=subprocess.DEVNULL)  # Ignore errors and proceed
 
 def get_tuxtest_logs(tuxtest_download_url):
+    # Function to get Tuxtest logs
     tuxtest_log_url = f"{tuxtest_download_url}/logs.txt"
     tuxtest_log = tempfile.mktemp()
     with open(tuxtest_log, 'w') as f:
         f.write(requests.get(tuxtest_log_url).text)
 
 def get_debug_artifacts(tuxbuild_url):
+    # Function to get debug artifacts (vmlinux and System.map)
     vmlinuxxz = tempfile.mktemp()
     with open(vmlinuxxz, 'w') as f:
         f.write(requests.get(f"{tuxbuild_url}/vmlinux.xz").content)
@@ -122,10 +133,12 @@ def get_debug_artifacts(tuxbuild_url):
     log("File: System.map:       /tmp/System.map")
 
 def decode_stack_trace(tuxtest_log, vmlinux_path, docker_image):
+    # Function to decode the stack trace
     with open(tuxtest_log, 'r') as f:
         subprocess.run(['docker', 'run', '--rm', '-i', '-v', '/data/linux:/linux:ro', '-v', '/tmp:/tmp', docker_image, '/linux/scripts/decode_stacktrace.sh', '/tmp/vmlinux'], stdout=subprocess.PIPE)
 
 def main():
+    usage()
     URL = input("Enter SQUAD Testrun URL or SQUAD Test URL: ")
     log(f"URL: {URL}")
 
